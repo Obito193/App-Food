@@ -19,7 +19,7 @@ const initialState: AuthProps = {
 export const loginAccount = createAsyncThunk(
   'post/loginAccount',
   async (data: LoginSendData) => {
-    const response = await useCallAPI({ method: 'POST', url: `${URL_API}login`, data: data })
+    const response = await useCallAPI({ method: 'POST', url: `${URL_API}login`, data: data, showToast: true })
     return response
   }
 )
@@ -27,7 +27,7 @@ export const loginAccount = createAsyncThunk(
 export const registerAccount = createAsyncThunk(
   'post/registerAccount',
   async (data: RegisterSendData) => {
-    const response = await useCallAPI({ method: 'POST', url: `${URL_API}register`, data: data })
+    const response = await useCallAPI({ method: 'POST', url: `${URL_API}register`, data: data, showToast: true })
     return response
   }
 )
@@ -63,13 +63,13 @@ const authSlice = createSlice({
       })
       .addCase(loginAccount.fulfilled, (state, action) => {
         state.authLoading = false;
-        if (action.payload && (action.payload.status === true || action.payload.status === false)) {
+        if (action.payload && (action.payload.success == true || action.payload.success == false)) {     
           state.loginResponse = action.payload;
         }
         else {
           state.loginResponse = undefined
         }
-        if (action.payload && action.payload.status === true) {
+        if (action.payload && action.payload.success === true) {
           const data = {
             user_name: action.payload?.user_name,
             email: action.payload?.email,
@@ -77,9 +77,9 @@ const authSlice = createSlice({
             role: action.payload?.role
           }
           state.account = data;
-          state.tokenData = action.payload.data.token
+          state.tokenData = action.payload.token
           saveObjectDataToStorage(KEY_STORAGE.ACCOUNT_DATA, data);
-          saveObjectDataToStorage(KEY_STORAGE.USER_TOKEN, action.payload.data.token);
+          saveObjectDataToStorage(KEY_STORAGE.USER_TOKEN, action.payload.token);
         }
         state.authError = null;
       })
@@ -94,13 +94,13 @@ const authSlice = createSlice({
       })
       .addCase(registerAccount.fulfilled, (state, action) => {
         state.authLoading = false;
-        if (action.payload && (action.payload.status === true || action.payload.status === false)) {
+        if (action.payload && (action.payload.success === true || action.payload.success === false)) {
           state.registerResponse = action.payload;
         }
         else {
-          state.loginResponse = undefined
+          state.registerResponse = undefined
         }
-        if (action.payload && action.payload.status === true) {
+        if (action.payload && action.payload.success === true) {
           const data = {
             user_name: action.payload?.user_name,
             email: action.payload?.email,

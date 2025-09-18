@@ -83,9 +83,6 @@ const ListProductTabBar: React.FC<ListProductTabBarProps> = () => {
   };
 
 
-
-
-
   const renderScene = useMemo(() => SceneMap({
     first: () => <FirstProductRoute />,
     second: () => <SecondProductRoute />,

@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import FastImage from 'react-native-fast-image';
 import sizes from '@assets/styles/sizes';
 import ServiceStorage, { KEY_STORAGE } from '@app-services/service-storage';
-import { loginAccount } from '@redux/features/authSlice';
+import { loginAccount, resetLoginResponse } from '@redux/features/authSlice';
 import { AppDispatch, RootState } from '@redux/store';
 
 interface SplashProps {}
@@ -53,6 +53,7 @@ const Splash: React.FC<SplashProps> = () => {
         })
       );
     }
+    dispatch(resetLoginResponse())
   }, [loginResponse?.token]);
 
   return (

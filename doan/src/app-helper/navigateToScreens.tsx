@@ -70,6 +70,18 @@ export const useNavigationComponentApp = () => {
   const goToCart = useOnEventCallback((route?: any) => {
     goToScreen('Cart', route);
   });
+  const goToOrder = useOnEventCallback((route?: any) => {
+    goToScreen('Order', route);
+  });
+  const goToOrderInfo = useOnEventCallback((route?: any) => {
+    goToScreen('OrderInfo', route);
+  });
+  const goToOrderList = useOnEventCallback((route?: any) => {
+    goToScreen('OrderList', route);
+  });
+  const goToOrderDetail = useOnEventCallback((route?: any) => {
+    goToScreen('OrderDetail', route);
+  });
   const goToViewAll = useOnEventCallback((route?: any) => {
     goToScreen('ViewAll', route);
   });
@@ -109,7 +121,11 @@ export const useNavigationComponentApp = () => {
     goToSingerScreen,
     goToViewPlaylist,
     goToViewAccountPackage,
-    goToSpeechToText
+    goToSpeechToText,
+    goToOrder,
+    goToOrderDetail,
+    goToOrderInfo,
+    goToOrderList
   };
 };
 

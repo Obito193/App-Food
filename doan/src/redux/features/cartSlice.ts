@@ -1,17 +1,19 @@
 import URL_API from "@app-helper/urlAPI";
 import useCallAPI from "@app-helper/useCallAPI";
 import { saveObjectDataToStorage } from "@app-helper/useSaveDataToStorage";
+import { calculateTotalPrice } from "@app-helper/utilities";
 import { CartFilterParams, CartItemUpdateData, CartProps, ProductCartData } from "@app-schemas/Cart/cart";
 import { KEY_STORAGE } from "@app-services/service-storage";
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-
-
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 const initialState: CartProps = {
   cartData: null,
   hasFetchedCartData: false,
   increaseProductQuantityInCartResponse: null,
   productCartListData: null,
+  currentPageProductCartListData: 1,
+  hasFetchedProductCartListData: false,
+  hasMoreProductCartListData: true,
   cartError: null,
   cartLoading: false
 };
@@ -35,108 +37,174 @@ export const getProductCartListData = createAsyncThunk(
 export const addProductInCart = createAsyncThunk(
   'post/addProductInCart',
   async (data: ProductCartData) => {
-    const response = await useCallAPI({ method: 'POST', url: `${URL_API}add-product-in-cart`, data: data })
+    const response = await useCallAPI({ method: 'POST', url: `${URL_API}add-product-in-cart`, data: data, showToast: true })
+    return response
+  }
+)
+
+export const removeProductInCart = createAsyncThunk(
+  'delete/removeProductInCart',
+  async ({ product_id, cart_id }: { product_id: string | number, cart_id: number | string }) => {
+    const response = await useCallAPI({ method: 'DELETE', url: `${URL_API}remove-product-in-cart`, data: { product_id, cart_id }, showToast: true })
     return response
   }
 )
 
 export const increaseProductQuantityInCart = createAsyncThunk(
-  'post/addProductInCart',
+  'put/increaseProductQuantityInCart',
   async (data: CartItemUpdateData) => {
-    const response = await useCallAPI({ method: 'PUT', url: `${URL_API}increase-product-quantity-in-cart`, data: data })
+    const response = await useCallAPI({ method: 'PUT', url: `${URL_API}increase-product-quantity-in-cart`, data: data, showToast: true })
     return response
   }
 )
 
 
 
-const authSlice = createSlice({
-  name: 'auth',
+
+const cartSlice = createSlice({
+  name: 'cart',
   initialState,
   reducers: {
-    resetLoginResponse: (state) => {
-      state.loginResponse = null
-      state.authError = null,
-        state.authLoading = false
+    resetAllCart: () => initialState,
+    resetCartData: (state) => {
+      state.cartData = null,
+        state.hasFetchedCartData = false
+      state.cartError = null
+      state.cartLoading = false
     },
-    resetRegisterResponse: (state) => {
-      state.registerResponse = null
-      state.authError = null,
-        state.authLoading = false
+    resetProductCartListData: (state) => {
+      state.productCartListData = null,
+        state.currentPageProductCartListData = 1,
+        state.hasFetchedProductCartListData = false,
+        state.hasMoreProductCartListData = true,
+        state.cartError = null
+      state.cartLoading = false
     },
-    resetAllAuth: (state) => {
-      state.loginResponse = null
-      state.registerResponse = null
-      state.account = null,
-        state.tokenData = null,
-        state.authError = null,
-        state.authLoading = false
+    resetIncreaseProductQuantityInCartResponse: (state) => {
+      state.increaseProductQuantityInCartResponse = null
+      state.cartError = null
+      state.cartLoading = false
+    },
+    updateQuantityOfProductInCart: (state, action) => {
+      if (
+        action.payload &&
+        state.productCartListData &&
+        Array.isArray(state.productCartListData) &&
+        state.productCartListData.length > 0
+      ) {
+        const product = state.productCartListData.find(
+          (item) => item?.product_id == action.payload?.product_id
+        );
+        if (product) {
+          product.quantity = action.payload.quantity;
+          product.total_price = action.payload.total_price;
+        }
+      }
     }
   },
   extraReducers: (builder) => {
     builder
-      .addCase(loginAccount.pending, (state) => {
-        state.authLoading = true;
-        state.authError = null;
+      .addCase(getCartData.pending, (state) => {
+        state.cartLoading = true;
+        state.cartError = null;
       })
-      .addCase(loginAccount.fulfilled, (state, action) => {
-        state.authLoading = false;
-        if (action.payload && (action.payload.status === true || action.payload.status === false)) {
-          state.loginResponse = action.payload;
+      .addCase(getCartData.fulfilled, (state, action) => {
+        state.cartLoading = false;
+        if (action.payload && action.payload.success && action.payload?.result) {
+          state.cartData = action.payload.result;
+          state.hasFetchedCartData = true
         }
-        else {
-          state.loginResponse = undefined
-        }
-        if (action.payload && action.payload.status === true) {
-          const data = {
-            user_name: action.payload?.user_name,
-            email: action.payload?.email,
-            user_avatar: action.payload?.user_avatar,
-            role: action.payload?.role
-          }
-          state.account = data;
-          state.tokenData = action.payload.data.token
-          saveObjectDataToStorage(KEY_STORAGE.ACCOUNT_DATA, data);
-          saveObjectDataToStorage(KEY_STORAGE.USER_TOKEN, action.payload.data.token);
-        }
-        state.authError = null;
       })
-      .addCase(loginAccount.rejected, (state, action) => {
-        state.authLoading = false;
-        state.authError = action.error.message || 'Login failed';
+      .addCase(getCartData.rejected, (state, action) => {
+        state.cartLoading = false;
+        state.cartError = action.error.message || 'Get cart failed';
       })
 
-      .addCase(registerAccount.pending, (state) => {
-        state.authLoading = true;
-        state.authError = null;
+      .addCase(increaseProductQuantityInCart.pending, (state) => {
+        state.cartLoading = true;
+        state.cartError = null;
       })
-      .addCase(registerAccount.fulfilled, (state, action) => {
-        state.authLoading = false;
-        if (action.payload && (action.payload.status === true || action.payload.status === false)) {
-          state.registerResponse = action.payload;
+      .addCase(increaseProductQuantityInCart.fulfilled, (state, action) => {
+        state.cartLoading = false;
+        if (action.payload) {
+          state.increaseProductQuantityInCartResponse = action.payload;
         }
-        else {
-          state.loginResponse = undefined
-        }
-        if (action.payload && action.payload.status === true) {
-          const data = {
-            user_name: action.payload?.user_name,
-            email: action.payload?.email,
-            role: action.payload?.role
+      })
+      .addCase(increaseProductQuantityInCart.rejected, (state, action) => {
+        state.cartLoading = false;
+        state.cartError = action.error.message || 'Get cart failed';
+      })
+
+      .addCase(removeProductInCart.pending, (state) => {
+        state.cartLoading = true;
+        state.cartError = null;
+      })
+      .addCase(removeProductInCart.fulfilled, (state, action) => {
+        state.cartLoading = false;
+        if (action.payload && action.payload.success && action.payload?.response) {
+          if (state.productCartListData && Array.isArray(state.productCartListData) && state.productCartListData.length > 0) {
+            state.productCartListData = state.productCartListData.filter(
+              (item) => item?.product_id != action.payload?.response?.product_id
+            );
           }
-          state.account = data;
-          state.tokenData = action.payload.token
-          saveObjectDataToStorage(KEY_STORAGE.ACCOUNT_DATA, data);
-          saveObjectDataToStorage(KEY_STORAGE.USER_TOKEN, action.payload.token);
         }
-        state.authError = null;
       })
-      .addCase(registerAccount.rejected, (state, action) => {
-        state.authLoading = false;
-        state.authError = action.error.message || 'Register failed';
-      });
+      .addCase(removeProductInCart.rejected, (state, action) => {
+        state.cartLoading = false;
+        state.cartError = action.error.message || 'Get cart failed';
+      })
+
+      .addCase(addProductInCart.pending, (state) => {
+        state.cartLoading = true;
+        state.cartError = null;
+      })
+      .addCase(addProductInCart.fulfilled, (state, action) => {
+        state.cartLoading = false;
+        if (action.payload && action.payload.success && action.payload?.response) {
+          if (state.productCartListData && Array.isArray(state.productCartListData) && state.productCartListData.length > 0) {
+            const index = state.productCartListData.findIndex(
+              (item) => item?.product_id == action.payload?.response.product_id
+            );
+            if (index !== -1) {
+              state.productCartListData[index] = action.payload?.response;
+            } else {
+              state.productCartListData = null,
+                state.currentPageProductCartListData = 1,
+                state.hasFetchedProductCartListData = false,
+                state.hasMoreProductCartListData = true
+            }
+          }
+        }
+      })
+      .addCase(addProductInCart.rejected, (state, action) => {
+        state.cartLoading = false;
+        state.cartError = action.error.message || 'Get cart failed';
+      })
+
+      .addCase(getProductCartListData.pending, (state) => {
+        state.cartLoading = true;
+        state.cartError = null;
+      })
+      .addCase(getProductCartListData.fulfilled, (state, action) => {
+        state.cartLoading = false;
+        if
+          (action.payload &&
+          action.payload.success &&
+          Array.isArray(action.payload?.data) &&
+          action.payload?.data?.length > 0
+        ) {
+          state.hasMoreProductCartListData = action.payload?.data?.length < 10 ? false : true
+          state.productCartListData = state.productCartListData ? [...state.productCartListData, ...action.payload?.data] : action.payload?.data
+          state.currentPageProductCartListData += 1
+          state.hasFetchedProductCartListData = true
+        }
+      })
+      .addCase(getProductCartListData.rejected, (state, action) => {
+        state.cartLoading = false;
+        state.cartError = action.error.message || 'Get Data failed';
+      })
   }
 });
 
-export const { resetLoginResponse, resetAllAuth, resetRegisterResponse } = authSlice.actions;
-export default authSlice.reducer;
+export const { resetAllCart, resetCartData, resetIncreaseProductQuantityInCartResponse, resetProductCartListData, updateQuantityOfProductInCart } = cartSlice.actions;
+export default cartSlice.reducer;

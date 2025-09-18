@@ -101,7 +101,7 @@ exports.getUserData = async (req, res, next) => {
 exports.updateProfile = async (req, res, next) => {
   try {
     const { user_id } = req.user
-    const { user_name } = req.body
+    const { user_name, phone_number } = req.body
     let user_avatar;
     if (req?.file?.filename !== undefined && req.file?.filename !== null && req.file?.filename) {
       user_avatar = `src/uploads/images/${req?.file?.filename}`;
@@ -110,12 +110,14 @@ exports.updateProfile = async (req, res, next) => {
       user_id: user_id,
       user_name: user_name,
       user_avatar: user_avatar,
+      phone_number: phone_number
     }
     const result = await UserServices.updateProfile(data)
     if (result) {
       return res.status(200).json(result);
     }
   } catch (err) {
-    return res.status(500).json({ success: false, error: err.message || err });
+    const statusCode = err?.status || err?.statusCode || 500;
+    return res.status(statusCode).json({ success: false, error: err.message || err });
   }
 }

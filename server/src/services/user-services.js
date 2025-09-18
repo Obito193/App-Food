@@ -77,6 +77,11 @@ class UserServices {
         values.push(user_name);
       }
 
+      if (phone_number) {
+        fieldsToUpdate.push("phone_number = ?");
+        values.push(phone_number);
+      }
+
       // Check for user_avatar explicitly, including null, to allow clearing the avatar
       if (user_avatar !== undefined) {
         fieldsToUpdate.push("user_avatar = ?");
@@ -98,7 +103,8 @@ class UserServices {
         }
         resolve({
           user_name: user_name,
-          user_avatar: user_avatar
+          user_avatar: user_avatar,
+          phone_number: phone_number
         })
       });
     });

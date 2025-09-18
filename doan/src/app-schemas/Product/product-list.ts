@@ -1,28 +1,28 @@
 export type FilterParams = {
-  page: number,
-  limit:number,
-  filterColumn: string, 
-  filterValue: string,
-  type: 'all'| 'drinks' | 'fast_food' | 'snacks'
+  page?: number,
+  limit?:number,
+  filterColumn?: string, 
+  filterValue?: string | number,
+  type?: 'all'| 'drinks' | 'fast_food' | 'snacks'
 }
 export type ProductListProps = {
     paginationProductTypeAll: any | null;
-    paginationProductTypeFastProduct: any | null;
+    paginationProductTypeFastFood: any | null;
     paginationProductTypeDrinks: any | null;
     paginationProductTypeSnacks: any | null;
   
     hasFetchedPaginationProductTypeAll: boolean;
-    hasFetchedPaginationProductTypeFastProduct: boolean;
+    hasFetchedPaginationProductTypeFastFood: boolean;
     hasFetchedPaginationProductTypeDrinks: boolean;
     hasFetchedPaginationProductTypeSnacks: boolean;
   
     hasMorePaginationProductTypeAll: boolean;
-    hasMorePaginationProductTypeFastProduct: boolean;
+    hasMorePaginationProductTypeFastFood: boolean;
     hasMorePaginationProductTypeDrinks: boolean;
     hasMorePaginationProductTypeSnacks: boolean;
   
     currentPagePaginationProductTypeAll: number;
-    currentPagePaginationProductTypeFastProduct: number;
+    currentPagePaginationProductTypeFastFood: number;
     currentPagePaginationProductTypeDrinks: number;
     currentPagePaginationProductTypeSnacks: number;
 

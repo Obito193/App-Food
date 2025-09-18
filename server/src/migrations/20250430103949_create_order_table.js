@@ -7,7 +7,8 @@ exports.up = function(knex) {
          .references('user_id').inTable('user')
          .onDelete('CASCADE');
 
-    table.decimal('total_price', 10, 2).notNullable();
+table.string('total_price', 1000).notNullable(); // Tổng giá (quantity * price)
+
     table.string('payment_status').defaultTo('pending'); // pending, paid, failed
     table.string('order_status').defaultTo('pending');   // pending, shipped, delivered, cancelled
     table.string('address').notNullable();              // ➔ thêm địa chỉ giao hàng

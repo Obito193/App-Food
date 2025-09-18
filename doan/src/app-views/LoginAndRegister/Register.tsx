@@ -9,7 +9,7 @@ import { useNavigationMainApp, useNavigationServices } from "@app-helper/navigat
 import { useDispatch, useSelector } from "react-redux";
 import AppLoading from "@app-components/AppLoading/AppLoading";
 import { registerAccount, resetRegisterResponse } from "@redux/features/authSlice";
-import { RootState } from "@redux/store";
+import { AppDispatch, RootState } from "@redux/store";
 import FastImage from "react-native-fast-image";
 import colors from "@assets/colors/global_colors";
 
@@ -18,7 +18,7 @@ interface RegisterProps { }
 const Register: React.FC<RegisterProps> = () => {
   const { goToLogin, goToBottomContainer } = useNavigationMainApp();
   const {replaceScreen} = useNavigationServices()
-  const dispatch = useDispatch();
+   const dispatch = useDispatch<AppDispatch>();
   const { registerResponse, authLoading } = useSelector((state: RootState) => state.auth);
 
   const [formData, setFormData] = useState({
@@ -179,4 +179,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default memo(Register);
+export default Register;

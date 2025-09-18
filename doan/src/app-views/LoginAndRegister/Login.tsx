@@ -29,17 +29,20 @@ interface LoginProps { }
 const Login: React.FC<LoginProps> = () => {
   const [isChecked, setChecked] = useState(false);
   const { goToRegister } = useNavigationMainApp();
-  const { replaceScreen } = useNavigationServices();
+ const {replaceScreen} = useNavigationServices()
+ const loginResponse = useSelector((state: RootState) => state.auth.loginResponse)
   const dispatch = useDispatch<AppDispatch>();
-  const { loginResponse, authError, authLoading } = useSelector((state: RootState) => state.auth);
+  
 
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email: 'an@gmail.com',
+    password: '123456',
   });
 
+
+
   useEffect(() => {
-    if (loginResponse && loginResponse?.success === true) {
+    if (loginResponse?.success == true) {
       replaceScreen('BottomContainer');
     }
   }, [loginResponse]);
@@ -55,7 +58,7 @@ const Login: React.FC<LoginProps> = () => {
       dispatch(loginAccount(formData));
     }
   };
-
+console.log('loginResponse', loginResponse)
 
   return (
     <KeyboardAvoidingView
@@ -147,7 +150,8 @@ const Login: React.FC<LoginProps> = () => {
                 paddingHorizontal={10}
                 paddingVertical={10}
                 backgroundColor={colors?.orange_primary}
-                onPress={() => replaceScreen('BottomContainer')}
+                // onPress={() => replaceScreen('BottomContainer')}
+                onPress={handleSubmitForm}
                  />
 
                 {/* Sign up */}
@@ -166,9 +170,9 @@ const Login: React.FC<LoginProps> = () => {
           )}
         </Formik>
       </ScrollView>
-      <Fragment>
+      {/* <Fragment>
         {authLoading && <AppLoading loading={authLoading} />}
-      </Fragment>
+      </Fragment> */}
     </KeyboardAvoidingView>
   );
 };
@@ -192,4 +196,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default memo(Login);
+export default Login;

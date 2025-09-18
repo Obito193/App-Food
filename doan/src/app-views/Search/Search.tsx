@@ -56,12 +56,16 @@ const Search: React.FC<SearchProps> = () => {
   <View style={{ flex: 1 }}>
     {/* Phần trên cố định */}
     <View>
-      <View style={{ ...styles_c.row_direction_align_center, gap: 8, padding: 10 }}>
-        <SearchBar recieveText={receiveTextSearch} />
-        <TouchableOpacity onPress={() => goToCart()}>
-          <Feather name="shopping-cart" size={sizes._25sdp} color={colors.white} />
-        </TouchableOpacity>
-      </View>
+       <View style={{ ...styles_c.row_direction_align_center, gap: 8, padding: 10 }}>
+          <View style={{width: '90%'}}>
+            <SearchBar recieveText={receiveTextSearch} />
+          </View>
+          <View style={{width: '10%'}}>
+             <TouchableOpacity onPress={() => goToCart()}>
+            <Feather name='shopping-cart' size={sizes._25sdp} color={colors.white} />
+          </TouchableOpacity>
+          </View>
+        </View>
 
       <View style={{ backgroundColor: colors.white, paddingHorizontal: 10, paddingVertical: 5, gap:5 }}>
         <Text style={{ fontWeight: 'bold', marginBottom: 5 }}>Gợi ý chuyên mục</Text>

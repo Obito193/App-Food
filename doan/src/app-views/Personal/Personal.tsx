@@ -5,15 +5,17 @@ import { Container, Content } from '@app-layout/Layout';
 import Ionicons from 'react-native-vector-icons/Ionicons'; // Nếu bạn dùng Expo
 import { LOGOAPP } from '@app-uikits/image';
 import colors from '@assets/colors/global_colors';
-import { useNavigationServices } from '@app-helper/navigateToScreens';
+import { useNavigationComponentApp, useNavigationServices } from '@app-helper/navigateToScreens';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@redux/store';
 import { resetAllAuth } from '@redux/features/authSlice';
+import FastImage from 'react-native-fast-image';
 
 interface PersonalProps { }
 
 const Personal: React.FC<PersonalProps> = () => {
   const { replaceScreen } = useNavigationServices();
+  const {goToOrderList} = useNavigationComponentApp()
   const dispatch = useDispatch<AppDispatch>()
   const onPressData = () => {
     dispatch(resetAllAuth())
@@ -21,7 +23,7 @@ const Personal: React.FC<PersonalProps> = () => {
   }
   const menuOptions = [
     { id: '1', icon: 'person-circle-outline', title: 'Thông tin tài khoản' },
-    { id: '2', icon: 'receipt-outline', title: 'Đơn hàng của tôi' },
+    { id: '2', icon: 'receipt-outline', title: 'Đơn hàng của tôi', press: () => goToOrderList()  },
     { id: '3', icon: 'cart', title: 'Giỏ hàng của tôi' },
     { id: '4', icon: 'location-outline', title: 'Địa chỉ giao hàng' },
     { id: '5', icon: 'settings-outline', title: 'Cài đặt' },
@@ -39,7 +41,7 @@ const Personal: React.FC<PersonalProps> = () => {
       {/* <HeaderApp title="Cá nhân" /> */}
       <Content style={{backgroundColor: colors.white }}>
         <View style={styles.profileContainer}>
-          <Image
+          <FastImage
             source={LOGOAPP}
             style={styles.avatar}
           />

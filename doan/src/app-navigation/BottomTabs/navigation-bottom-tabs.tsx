@@ -15,6 +15,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import Entypo from 'react-native-vector-icons/Entypo';
 
 import sizes from '@assets/styles/sizes';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const Tab = createBottomTabNavigator();
 
@@ -26,7 +27,7 @@ EStyleSheet.build({
 
 enum MainTab {
   Home = 'Trang chủ',
-  Notification = 'Thông báo',
+  Order = 'Đơn hàng',
   Search = 'Tìm kiếm',
   Personal = 'Cá nhân',
 }
@@ -45,10 +46,10 @@ const Tabs = [
     icon: (color: any) => <AntDesign name='search1' color={color} size={sizes._24sdp} />
   },
   {
-    name: MainTab.Notification,
-    screen: require('@app-views/Notification/Notification')
+    name: MainTab.Order,
+    screen: require('@app-views/Order/OrderList')
       .default,
-    icon: (color: any) => <Fontisto name='bell' color={color} size={sizes._24sdp} />
+    icon: (color: any) => <Ionicons name='receipt-outline' color={color} size={sizes._24sdp} />
   },
   {
     name: MainTab.Personal,

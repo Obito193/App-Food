@@ -8,19 +8,19 @@ import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 const initialState: ProductListProps = {
   paginationProductTypeAll: null,
-  paginationProductTypeFastProduct: null,
+  paginationProductTypeFastFood: null,
   paginationProductTypeDrinks: null,
   paginationProductTypeSnacks: null,
   hasFetchedPaginationProductTypeAll: false,
-  hasFetchedPaginationProductTypeFastProduct: false,
+  hasFetchedPaginationProductTypeFastFood: false,
   hasFetchedPaginationProductTypeDrinks: false,
   hasFetchedPaginationProductTypeSnacks: false,
   hasMorePaginationProductTypeAll: true,
-  hasMorePaginationProductTypeFastProduct: true,
+  hasMorePaginationProductTypeFastFood: true,
   hasMorePaginationProductTypeDrinks: true,
   hasMorePaginationProductTypeSnacks: true,
   currentPagePaginationProductTypeAll: 1,
-  currentPagePaginationProductTypeFastProduct: 1,
+  currentPagePaginationProductTypeFastFood: 1,
   currentPagePaginationProductTypeDrinks: 1,
   currentPagePaginationProductTypeSnacks: 1,
   productListError: null,
@@ -39,31 +39,18 @@ const productListSlice = createSlice({
   name: 'productList',
   initialState,
   reducers: {
-    resetAllProductListData: (state) => {
-      state.paginationProductTypeAll = null,
-        state.paginationProductTypeFastProduct = null,
-        state.paginationProductTypeDrinks = null,
-        state.paginationProductTypeSnacks = null,
-        state.hasFetchedPaginationProductTypeAll = false,
-        state.hasFetchedPaginationProductTypeFastProduct = false,
-        state.hasFetchedPaginationProductTypeDrinks = false,
-        state.hasFetchedPaginationProductTypeSnacks = false,
-        state.hasMorePaginationProductTypeAll = true,
-        state.hasMorePaginationProductTypeFastProduct = true,
-        state.hasMorePaginationProductTypeDrinks = true,
-        state.hasMorePaginationProductTypeSnacks = true,
-        state.currentPagePaginationProductTypeAll = 1,
-        state.currentPagePaginationProductTypeFastProduct = 1,
-        state.currentPagePaginationProductTypeDrinks = 1,
-        state.currentPagePaginationProductTypeSnacks = 1,
-        state.productListError = null,
-        state.productListLoading = false
-    },
+    resetAllProductListData: () => initialState,
     resetProductTypeAll : (state) => {
       state.paginationProductTypeAll = null;
       state.hasFetchedPaginationProductTypeAll = false;
       state.hasMorePaginationProductTypeAll = true;
       state.currentPagePaginationProductTypeAll = 1;
+    },
+    resetProductTypeFastFood : (state) => {
+      state.paginationProductTypeFastFood = null;
+      state.hasFetchedPaginationProductTypeFastFood = false;
+      state.hasMorePaginationProductTypeFastFood = true;
+      state.currentPagePaginationProductTypeFastFood = 1;
     },
     resetProductTypeDrinks : (state) => {
       state.paginationProductTypeDrinks = null;
@@ -102,7 +89,7 @@ const productListSlice = createSlice({
             (action.payload.data).length >= 0 &&
             action.payload.success
           ) {
-            state.hasMorePaginationProductTypeAll = (action.payload.data).length < limit ? false : true
+            state.hasMorePaginationProductTypeAll = (action.payload.data).length < 10 ? false : true
             state.paginationProductTypeAll =
               state.paginationProductTypeAll ?
                 [...state.paginationProductTypeAll, ...action.payload.data] :
@@ -118,7 +105,7 @@ const productListSlice = createSlice({
             (action.payload.data).length >= 0 &&
             action.payload.success
           ) {
-            state.hasMorePaginationProductTypeSnacks = (action.payload.data).length < limit ? false : true
+            state.hasMorePaginationProductTypeSnacks = (action.payload.data).length < 10 ? false : true
             state.paginationProductTypeSnacks =
               state.paginationProductTypeSnacks ?
                 [...state.paginationProductTypeSnacks, ...action.payload.data] :
@@ -135,13 +122,13 @@ const productListSlice = createSlice({
             (action.payload.data).length >= 0 &&
             action.payload.success
           ) {
-            state.hasMorePaginationProductTypeFastProduct = (action.payload.data).length < limit ? false : true
-            state.paginationProductTypeFastProduct =
-              state.paginationProductTypeFastProduct ?
-                [...state.paginationProductTypeFastProduct, ...action.payload.data] :
+            state.hasMorePaginationProductTypeFastFood = (action.payload.data).length < 10 ? false : true
+            state.paginationProductTypeFastFood =
+              state.paginationProductTypeFastFood ?
+                [...state.paginationProductTypeFastFood, ...action.payload.data] :
                 action.payload.data
-            state.currentPagePaginationProductTypeFastProduct = state.currentPagePaginationProductTypeFastProduct + 1
-            state.hasFetchedPaginationProductTypeFastProduct = true
+            state.currentPagePaginationProductTypeFastFood = state.currentPagePaginationProductTypeFastFood + 1
+            state.hasFetchedPaginationProductTypeFastFood = true
           }
         } else if (
           type === 'drinks' &&
@@ -151,7 +138,7 @@ const productListSlice = createSlice({
             (action.payload.data).length >= 0 &&
             action.payload.success
           ) {
-            state.hasMorePaginationProductTypeDrinks = (action.payload.data).length < limit ? false : true
+            state.hasMorePaginationProductTypeDrinks = (action.payload.data).length < 10 ? false : true
             state.paginationProductTypeDrinks =
               state.paginationProductTypeDrinks ?
                 [...state.paginationProductTypeDrinks, ...action.payload.data] :
@@ -174,6 +161,7 @@ export const {
   resetProductListStatus,
   resetProductTypeAll,
   resetProductTypeDrinks,
+  resetProductTypeFastFood,
   resetProductTypeSnacks
 } = productListSlice.actions;
 

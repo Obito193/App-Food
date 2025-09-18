@@ -24,6 +24,26 @@ export const ListStackScreens: Record<string, any> = {
     component: require('@app-views/Cart/Cart')
       .default,
   },
+  Order: {
+    name: 'Order',
+    component: require('@app-views/Order/Order')
+      .default,
+  },
+  OrderList: {
+    name: 'OrderList',
+    component: require('@app-views/Order/OrderList')
+      .default,
+  },
+  OrderDetail: {
+    name: 'OrderDetail',
+    component: require('@app-views/Order/OrderDetail')
+      .default,
+  },
+  OrderInfo: {
+    name: 'OrderInfo',
+    component: require('@app-views/Order/OrderInfo')
+      .default,
+  },
   Splash: {
     name: 'Splash',
     component: require('@app-views/Splash/Splash')

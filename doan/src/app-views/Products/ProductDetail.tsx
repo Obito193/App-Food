@@ -9,11 +9,17 @@ import HeaderCustom from "@app-components/HeaderCustom/HeaderCustom";
 import sizes from "@assets/styles/sizes";
 import Feather from "react-native-vector-icons/Feather";
 import { useNavigationComponentApp } from "@app-helper/navigateToScreens";
+import useCallAPI from "@app-helper/useCallAPI";
+import URL_API from "@app-helper/urlAPI";
+import { shallowEqual, useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@redux/store";
+import { addProductInCart } from "@redux/features/cartSlice";
 
 type Product = {
   id: string;
   name: string;
   description: string;
+  category: string
   price: string;
   image: string;
 };
@@ -23,7 +29,21 @@ type ProductDetailRouteProp = RouteProp<{ ProductDetail: { product: Product } },
 const ProductDetail: React.FC = () => {
   const route = useRoute<ProductDetailRouteProp>();
   const { product } = route.params ?? {};
-  const { goToCart } = useNavigationComponentApp()
+  const { goToCart, goToOrder } = useNavigationComponentApp()
+  const dispatch = useDispatch<AppDispatch>();
+  const { cartData } = useSelector((state: RootState) => state.cart, shallowEqual)
+  const onPressAddCart = () => {
+    if(cartData && cartData?.id){
+      const data = {
+        cart_id: cartData?.id,
+        quantity: 1,  
+        product_id: product.id,
+        total_price: product.price,
+        ...product
+      }
+      dispatch(addProductInCart(data))
+    }
+  }
 
   return (
     <Container>
@@ -43,10 +63,12 @@ const ProductDetail: React.FC = () => {
           <Text style={styles.description}>{product.description}</Text>
 
           <View style={{ ...styles_c.row_direction_align_center, gap: 5, width: '100%' }}>
-            <TouchableOpacity style={[styles.button, { backgroundColor: colors.green_primary }]}>
+            <TouchableOpacity 
+            style={[styles.button, { backgroundColor: colors.green_primary }]}
+            onPress={onPressAddCart}>
               <Text style={styles.buttonText}>Thêm vào giỏ hàng</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button}>
+            <TouchableOpacity style={styles.button} onPress={() => goToOrder({products: [product]})}>
               <Text style={styles.buttonText}>Đặt hàng ngay</Text>
             </TouchableOpacity>
           </View>

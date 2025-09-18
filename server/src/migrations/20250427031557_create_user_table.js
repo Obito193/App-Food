@@ -3,6 +3,7 @@ exports.up = function(knex) {
     table.increments('user_id').primary(); // Tự động tăng ID
     table.string('user_name').notNullable();
     table.string('user_avatar'); // Avatar có thể để trống
+    table.strng('phone_number');
     table.string('role').notNullable();
     table.string('email').unique().notNullable();
     table.string('password').notNullable();

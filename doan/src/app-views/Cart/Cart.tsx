@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, FlatList, TextInput, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import React, { Fragment, useEffect, useRef, useState } from 'react';
+import { View, Text, FlatList, TextInput, StyleSheet, Image, TouchableOpacity, RefreshControl } from 'react-native';
 import HeaderCustom from '@app-components/HeaderCustom/HeaderCustom';
 import { Container, Content, Footer } from '@app-layout/Layout';
 import { CheckBox } from '@rneui/base';
@@ -9,6 +9,10 @@ import { useNavigationComponentApp } from '@app-helper/navigateToScreens';
 import sizes from '@assets/styles/sizes';
 import snacksData from '../../data/snacks.json';
 import styles_c from '@assets/styles/styles_c';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '@redux/store';
+import { getProductCartListData, increaseProductQuantityInCart, removeProductInCart, resetAllCart, resetIncreaseProductQuantityInCartResponse, updateQuantityOfProductInCart } from '@redux/features/cartSlice';
+import { ProductCartData } from '@app-schemas/Cart/cart';
 
 interface ProductInCart {
   id: number;
@@ -19,29 +23,53 @@ interface ProductInCart {
   image: string;
 }
 
-const initialCart: ProductInCart[] = [
-  {
-    id: 1,
-    name: 'Áo thun',
-    price: 200000,
-    quantity: 1,
-    selected: false,
-    image: 'https://daynauan.vn/uploads/2015/07/hamburger2.jpg',
-  },
-  {
-    id: 2,
-    name: 'Quần jean',
-    price: 350000,
-    quantity: 2,
-    selected: false,
-    image: 'https://daynauan.vn/uploads/2015/07/hamburger2.jpg',
-  },
-];
-
 const Cart: React.FC = () => {
-  const {goToProductDetail} = useNavigationComponentApp()
-  const renderItem = ({ item, index }: { item: any, index: number }) => (
-    <TouchableOpacity style={{ width: '45%', margin: 10 }} onPress={()=> goToProductDetail({product: item})}>
+  const { goToProductDetail, goToOrder } = useNavigationComponentApp()
+  const dispatch = useDispatch<AppDispatch>();
+  const { cartData, currentPageProductCartListData, cartLoading, hasFetchedProductCartListData, hasMoreProductCartListData, productCartListData, increaseProductQuantityInCartResponse } = useSelector((state: RootState) => state.cart, shallowEqual)
+  const [refreshing, setRefreshing] = useState<boolean>(false)
+  const [triggerResetData, setTriggerResetData] = useState<boolean>(false)
+  const [cartItems, setCartItems] = useState<ProductCartData[]>([]);
+
+  const toggleSelection = (item: ProductCartData) => {
+    setCartItems((prevCartItems) => {
+      const isSelected = prevCartItems.some(cartItem => cartItem?.product_id === item?.product_id);
+
+      if (isSelected) {
+        return prevCartItems?.filter(cartItem => cartItem.product_id !== item.product_id);
+      } else {
+        return [...prevCartItems, item];
+      }
+    });
+  };
+
+  console.log('cartItems', cartItems)
+
+
+  useEffect(() => {
+    if (cartData && cartData?.id && !hasFetchedProductCartListData && !triggerResetData) {
+      dispatch(getProductCartListData({ page: 1, limit: 10, filterColumn: 'cart_id', filterValue: cartData?.id }))
+      setTriggerResetData(true)
+    }
+  }, [cartData, hasFetchedProductCartListData, triggerResetData])
+
+
+  const handleLoadMore = () => {
+    if (currentPageProductCartListData > 1 && hasMoreProductCartListData && !cartLoading && cartData && cartData?.id) {
+      dispatch(getProductCartListData({ page: currentPageProductCartListData, limit: 10, filterColumn: 'cart_id', filterValue: cartData?.id }))
+    }
+  }
+
+  const onRefreshData = () => {
+    if (!cartLoading) {
+      setRefreshing(true)
+      setTriggerResetData(false)
+      dispatch(resetAllCart())
+      setRefreshing(false)
+    }
+  }
+  const renderItem = ({ item, index }: { item: ProductCartData, index: number }) => (
+    <TouchableOpacity style={{ width: '45%', margin: 10 }} onPress={() => goToProductDetail({ product: item })}>
       <View style={{ padding: 10, backgroundColor: '#fff', borderRadius: 8, elevation: 3 }}>
         <FastImage
           source={{ uri: item.image }}
@@ -59,95 +87,182 @@ const Cart: React.FC = () => {
       </View>
     </TouchableOpacity>
   );
-  const [cartItems, setCartItems] = useState<ProductInCart[]>(initialCart);
 
-  const toggleSelection = (id: number) => {
-    setCartItems(prev =>
-      prev.map(item =>
-        item.id === id ? { ...item, selected: !item.selected } : item
-      )
-    );
+  const DEBOUNCE_TIME = 300;
+
+  const [pendingUpdate, setPendingUpdate] = useState<{
+    cart_id: number;
+    price: string;
+    product_id: number;
+    quantity: number;
+  } | null>(null);
+
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+
+  const onUpdateProductQuantity = ({ cart_id, price, product_id, quantity, type }: {
+    cart_id: number;
+    price: string
+    product_id: number;
+    quantity: number;
+    type: 'increase' | 'decrease' | 'text_input'
+  }) => {
+    let newQuantity
+    if (type === 'increase') {
+      newQuantity = quantity + 1
+    } else if (type === 'decrease') {
+      newQuantity = quantity - 1
+    } else if (type === 'text_input') {
+      newQuantity = quantity
+    }
+    setPendingUpdate({ cart_id, price, product_id, quantity: newQuantity });
   };
 
-  const changeQuantity = (id: number, quantity: number) => {
-    setCartItems(prev =>
-      prev.map(item =>
-        item.id === id ? { ...item, quantity: Math.max(1, quantity) } : item
-      )
-    );
-  };
+  useEffect(() => {
+    if (pendingUpdate) {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
 
-  const increaseQuantity = (id: number) => {
-    const item = cartItems.find(p => p.id === id);
-    if (item) changeQuantity(id, item.quantity + 1);
-  };
+      debounceTimer.current = setTimeout(() => {
+        dispatch(increaseProductQuantityInCart(pendingUpdate));
+      }, DEBOUNCE_TIME);
+    }
 
-  const decreaseQuantity = (id: number) => {
-    const item = cartItems.find(p => p.id === id);
-    if (item && item.quantity > 1) changeQuantity(id, item.quantity - 1);
-  };
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+    };
+  }, [pendingUpdate]);
+
+  useEffect(() => {
+    if (increaseProductQuantityInCartResponse && increaseProductQuantityInCartResponse.success && increaseProductQuantityInCartResponse.response) {
+      dispatch(updateQuantityOfProductInCart(increaseProductQuantityInCartResponse.response));
+      dispatch(resetIncreaseProductQuantityInCartResponse());
+    } else if (increaseProductQuantityInCartResponse) {
+      dispatch(resetIncreaseProductQuantityInCartResponse());
+      onRefreshData();
+    }
+  }, [increaseProductQuantityInCartResponse]);
+
+  const handleCreateOrder = () => {
+    if(Array.isArray(cartItems) && cartItems?.length > 0){
+      goToOrder({products: cartItems})
+    }
+  }
+
+
 
   return (
     <Container>
       <HeaderCustom title="Giỏ hàng" />
-      <Content>
-      <View style={{padding:10}}>
-          <Text style={{...styles_c.font_text_16_600}}>Sản phẩm đã chọn</Text>
-        </View>
-        <FlatList
-          data={cartItems}
-          keyExtractor={item => item.id.toString()}
-          scrollEnabled={false}
-          renderItem={({ item }) => (
-            <View style={styles.itemContainer}>
-              <CheckBox
-                checked={item.selected}
-                onPress={() => toggleSelection(item.id)}
-                containerStyle={styles.checkbox}
-              />
-              <FastImage source={{ uri: item.image }} style={styles.image} />
-              <View style={{ flex: 1, marginLeft: 10 }}>
-                <Text style={styles.name}>{item.name}</Text>
-                <Text style={styles.price}>{item.price.toLocaleString()} đ</Text>
-              </View>
-
-              <View style={styles.quantityContainer}>
-                <TouchableOpacity onPress={() => decreaseQuantity(item.id)} style={styles.quantityButton}>
-                  <Text style={styles.quantityText}>-</Text>
-                </TouchableOpacity>
-                <TextInput
-                  style={styles.input}
-                  keyboardType="numeric"
-                  value={item.quantity.toString()}
-                  onChangeText={text => {
-                    const num = parseInt(text) || 1;
-                    changeQuantity(item.id, num);
-                  }}
-                />
-                <TouchableOpacity onPress={() => increaseQuantity(item.id)} style={styles.quantityButton}>
-                  <Text style={styles.quantityText}>+</Text>
-                </TouchableOpacity>
-              </View>
+      <FlatList
+        data={[1]}
+        showsVerticalScrollIndicator={false}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.7}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefreshData} />}
+        renderItem={() => (
+          <Fragment>
+            <View style={{ padding: 10 }}>
+              <Text style={{ ...styles_c.font_text_16_600 }}>Sản phẩm đã chọn</Text>
             </View>
-          )}
-        />
-        <View style={{padding:10}}>
-          <Text style={{...styles_c.font_text_16_600}}>Gợi ý sản phẩm</Text>
-        </View>
-        <View style={{ flex: 1, padding: 5, paddingBottom: 30 }}>
-          <FlatList
-            data={snacksData}
-            keyExtractor={(item, index) => item.id ? item?.id.toString() : index.toString()}
-            numColumns={2}
-            scrollEnabled={false}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ gap: 10 }}
-            renderItem={renderItem}
-          />
-        </View>
-      </Content>
+            <FlatList
+              data={productCartListData}
+              keyExtractor={(item, index) => item?.product_id ? item?.product_id.toString() : index.toString()}
+              scrollEnabled={false}
+              renderItem={({ item }) => (
+                <View style={styles.itemContainer}>
+                  <CheckBox
+                    checked={cartItems.includes(item)}
+                    onPress={() => toggleSelection(item)}
+                    containerStyle={styles.checkbox}
+                  />
+
+                  <FastImage
+                    source={{ uri: item.image }}
+                    style={styles.image}
+                    resizeMode={FastImage.resizeMode.cover}
+                  />
+
+                  <View style={{ flex: 1, marginLeft: 10, gap: 10 }}>
+                    <Text style={styles.name} numberOfLines={2}>{item.name}</Text>
+                    <Text style={styles.price}>{item.price.toLocaleString()} đ</Text>
+
+                    <View style={styles.quantityContainer}>
+                      <TouchableOpacity
+                        onPress={() => onUpdateProductQuantity({
+                          cart_id: item.cart_id,
+                          price: item.price,
+                          product_id: item.product_id,
+                          quantity: item.quantity,
+                          type: 'decrease'
+                        })}
+                        style={styles.quantityButton}
+                      >
+                        <Text style={styles.quantityText}>-</Text>
+                      </TouchableOpacity>
+
+                      <TextInput
+                        style={styles.input}
+                        keyboardType="numeric"
+                        value={item.quantity.toString()}
+                        onChangeText={text => {
+                          const num = parseInt(text) || 1;
+                          onUpdateProductQuantity({
+                            cart_id: item.cart_id,
+                            price: item.price,
+                            product_id: item.product_id,
+                            quantity: num,
+                            type: 'text_input'
+                          })
+                        }}
+                      />
+
+                      <TouchableOpacity
+                        onPress={() => onUpdateProductQuantity({
+                          cart_id: item.cart_id,
+                          price: item.price,
+                          product_id: item.product_id,
+                          quantity: item.quantity,
+                          type: 'increase'
+                        })}
+                        style={styles.quantityButton}
+                      >
+                        <Text style={styles.quantityText}>+</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+
+                  <TouchableOpacity
+                    onPress={() => dispatch(removeProductInCart({ product_id: item?.product_id, cart_id: item?.cart_id }))}
+                    style={styles.deleteButton}
+                  >
+                    <Text style={styles.deleteButtonText}>×</Text>
+                  </TouchableOpacity>
+                </View>
+
+              )}
+            />
+            <View style={{ padding: 10 }}>
+              <Text style={{ ...styles_c.font_text_16_600 }}>Gợi ý sản phẩm</Text>
+            </View>
+            <View style={{ flex: 1, padding: 5, paddingBottom: 30 }}>
+              <FlatList
+                data={snacksData}
+                keyExtractor={(item, index) => item.id ? item?.id.toString() : index.toString()}
+                numColumns={2}
+                scrollEnabled={false}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ gap: 10 }}
+                renderItem={renderItem}
+              />
+            </View>
+          </Fragment>
+        )}
+      />
       <Footer>
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={handleCreateOrder}>
           <Text style={styles.buttonText}>Đặt hàng ngay</Text>
         </TouchableOpacity>
       </Footer>
@@ -169,8 +284,8 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   image: {
-    width: 60,
-    height: 60,
+    width: sizes._80sdp,
+    height: sizes._80sdp,
     borderRadius: 8,
     backgroundColor: '#eee',
   },
@@ -186,7 +301,6 @@ const styles = StyleSheet.create({
   quantityContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginLeft: 10,
   },
   quantityButton: {
     width: 28,
@@ -214,8 +328,8 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: "#e67e22",
     padding: 12,
-    margin:20,
-    marginBottom:30,
+    margin: 20,
+    marginBottom: 30,
     borderRadius: 10,
     alignItems: "center",
 
@@ -224,7 +338,23 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "600"
-  }
+  },
+  deleteButton: {
+    marginLeft: 8,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#ff4d4d',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  deleteButtonText: {
+    color: '#fff',
+    fontSize: sizes._25sdp,
+    fontWeight: 'bold',
+    lineHeight: 18,
+  },
+
 });
 
 export default Cart;

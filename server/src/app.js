@@ -9,6 +9,7 @@ const orderItemsRouter = require('./routes/order-items-router');
 const productRouter = require('./routes/product-router');
 const cartRouter = require('./routes/cart-router');
 const cartItemsRouter = require('./routes/cart-items-router');
+const searchRouter = require('./routes/search-router');
 
 
 app.set('view engine', 'ejs');
@@ -25,6 +26,7 @@ app.use('/', cartRouter)
 app.use('/', cartItemsRouter)
 app.use('/', orderItemsRouter)
 app.use('/', productRouter)
+app.use('/', searchRouter)
 
 
 module.exports = app

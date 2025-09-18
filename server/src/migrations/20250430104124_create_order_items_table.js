@@ -13,8 +13,8 @@ exports.up = function (knex) {
       .onDelete('CASCADE');
 
     table.integer('quantity').notNullable();   // Số lượng sản phẩm
-    table.decimal('total_price', 10, 2).notNullable(); // Tổng giá (quantity * price)
-    table.decimal('price', 10, 2).notNullable(); // Giá 1 sản phẩm tại thời điểm mua
+   table.string('price', 1000).notNullable(); // Giá sản phẩm
+table.string('total_price', 1000).notNullable(); // Tổng giá (quantity * price)
     table.string('name', 255); // Tên sản phẩm
     table.string('category', 255); // Danh mục sản phẩm
     table.text('image'); // Link ảnh sản phẩm

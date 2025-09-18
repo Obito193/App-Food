@@ -32,25 +32,57 @@ class OrderServices {
     });
   }
   static createOrder(user_id, data) {
-    const { total_price, payment_status, order_status, address } = data
+    const { total_price, payment_status, order_status, address, items } = data;
     return new Promise((resolve, reject) => {
       sql.query(
-        "INSERT INTO `order` (`user_id`, `payment_status`, `order_status`,`address`,`total_price`) VALUES (?,?,?,?,?)",
+        "INSERT INTO `order` (`user_id`, `payment_status`, `order_status`, `address`, `total_price`) VALUES (?,?,?,?,?)",
         [user_id, payment_status, order_status, address, total_price],
         (err, res) => {
           if (err) {
             console.log(err);
             return reject(err);
           }
-          const id = res.insertId
-          return resolve({
-            id: id,
-            user_id: user_id,
-            payment_status: payment_status,
-            order_status: order_status,
-            address: address,
-            total_price: total_price
-          })
+          const now = new Date();
+          const orderId = res.insertId;
+
+          if (!items || items.length === 0) {
+            return reject(new Error("No items provided"));
+          }
+
+          const orderItemsData = items.map(item => [
+            orderId,                // order_id
+            item.product_id,         // product_id
+            item.quantity,           // quantity
+            item.price,              // price
+            item.total_price,        // total_price
+            item.name,               // name
+            item.category,           // category
+            item.image,              // image
+            item.description         // description
+          ]);
+
+          sql.query(
+            "INSERT INTO `order_items` (`order_id`, `product_id`, `quantity`, `price`, `total_price`, `name`, `category`, `image`, `description`) VALUES ?",
+            [orderItemsData],
+            (err2, res2) => {
+              if (err2) {
+                console.log(err2);
+                return reject(err2);
+              }
+
+              return resolve({
+                order_id: orderId,
+                user_id,
+                total_price,
+                payment_status,
+                order_status,
+                created_at: now,
+                updated_at: now,
+                address,
+                // items
+              });
+            }
+          );
         }
       );
     });
