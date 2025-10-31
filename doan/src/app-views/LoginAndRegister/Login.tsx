@@ -23,6 +23,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { CheckBox } from '@rneui/base';
 import { loginSchema } from "./schema/validationForm";
 import colors from "@assets/colors/global_colors";
+import ServiceStorage, { KEY_STORAGE } from "@app-services/service-storage";
 
 interface LoginProps { }
 
@@ -35,9 +36,16 @@ const Login: React.FC<LoginProps> = () => {
   
 
   const [formData, setFormData] = useState({
-    email: 'an@gmail.com',
-    password: '123456',
+    email: '',
+    password: '',
   });
+
+  useEffect(() => {
+     (async() => {
+       const data = await ServiceStorage.getObject(KEY_STORAGE.ACCOUNT_DATA, {})
+       setFormData({email: data?.email, password: ''})
+     })()
+  },[])
 
 
 
@@ -130,7 +138,7 @@ console.log('loginResponse', loginResponse)
                 </View>
 
                 {/* Checkbox + Forgot password */}
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                {/* <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                   <CheckBox
                     title="Remember me"
                     checked={isChecked}
@@ -142,7 +150,7 @@ console.log('loginResponse', loginResponse)
                       Forgot your password?
                     </Text>
                   </TouchableOpacity>
-                </View>
+                </View> */}
 
                 {/* Sign In button */}
                 <ButtonBase 

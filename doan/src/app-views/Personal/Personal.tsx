@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment, useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList } from 'react-native';
 import HeaderApp from '@app-components/HeaderApp/HeaderApp';
 import { Container, Content } from '@app-layout/Layout';
@@ -6,27 +6,38 @@ import Ionicons from 'react-native-vector-icons/Ionicons'; // Nếu bạn dùng 
 import { LOGOAPP } from '@app-uikits/image';
 import colors from '@assets/colors/global_colors';
 import { useNavigationComponentApp, useNavigationServices } from '@app-helper/navigateToScreens';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '@redux/store';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '@redux/store';
 import { resetAllAuth } from '@redux/features/authSlice';
 import FastImage from 'react-native-fast-image';
+import { resetAllCart } from '@redux/features/cartSlice';
+import { resetAllOrderData } from '@redux/features/orderSlice';
+import { resetAllProductListData } from '@redux/features/productListSlice';
+import AppLoading from '@app-components/AppLoading/AppLoading';
 
 interface PersonalProps { }
 
 const Personal: React.FC<PersonalProps> = () => {
   const { replaceScreen } = useNavigationServices();
-  const {goToOrderList} = useNavigationComponentApp()
+  const {goToOrderList, goToCart} = useNavigationComponentApp()
+  const [loading, setLoading] = useState<boolean>(false)
   const dispatch = useDispatch<AppDispatch>()
+  const { account } = useSelector((state: RootState) => state.auth, shallowEqual)
   const onPressData = () => {
+    setLoading(true)
     dispatch(resetAllAuth())
+    dispatch(resetAllCart())
+    dispatch(resetAllOrderData())
+    dispatch(resetAllProductListData())
+    setLoading(false)
     replaceScreen('Login')
   }
   const menuOptions = [
-    { id: '1', icon: 'person-circle-outline', title: 'Thông tin tài khoản' },
-    { id: '2', icon: 'receipt-outline', title: 'Đơn hàng của tôi', press: () => goToOrderList()  },
-    { id: '3', icon: 'cart', title: 'Giỏ hàng của tôi' },
-    { id: '4', icon: 'location-outline', title: 'Địa chỉ giao hàng' },
-    { id: '5', icon: 'settings-outline', title: 'Cài đặt' },
+    // { id: '1', icon: 'person-circle-outline', title: 'Thông tin tài khoản' },
+    // { id: '2', icon: 'receipt-outline', title: 'Đơn hàng của tôi', press: () => goToOrderList()  },
+    { id: '3', icon: 'cart', title: 'Giỏ hàng của tôi',press: () => goToCart() },
+    // { id: '4', icon: 'location-outline', title: 'Địa chỉ giao hàng' },
+    // { id: '5', icon: 'settings-outline', title: 'Cài đặt' },
     { id: '6', icon: 'log-out-outline', title: 'Đăng xuất', press: () => onPressData() },
   ];
   
@@ -45,7 +56,7 @@ const Personal: React.FC<PersonalProps> = () => {
             source={LOGOAPP}
             style={styles.avatar}
           />
-          <Text style={styles.username}>Nguyễn Văn A</Text>
+          <Text style={styles.username}>{account?.user_name}</Text>
         </View>
         <View>
           <FlatList
@@ -64,6 +75,9 @@ const Personal: React.FC<PersonalProps> = () => {
           />
         </View>
       </Content>
+      <Fragment>
+        {loading && <AppLoading loading={loading}/>}
+      </Fragment>
     </Container>
   );
 };

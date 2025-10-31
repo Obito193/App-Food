@@ -2,7 +2,7 @@ exports.up = function(knex) {
   return knex.schema.createTable('product', function(table) {
     table.increments('id').primary();
     table.string('name').notNullable();
-    table.string('category').notNullable();
+    table.string('category').notNullable(); // snacks, fast_food, drinks
     table.text('image');
     table.string('price').notNullable();
     table.text('description');

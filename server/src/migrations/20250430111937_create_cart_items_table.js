@@ -6,8 +6,8 @@ exports.up = function(knex) {
     table.integer('cart_id').unsigned().notNullable(); // ID giỏ hàng (khóa ngoại)
     table.integer('product_id').unsigned().notNullable(); // ID sản phẩm (khóa ngoại)
     table.integer('quantity').defaultTo(1); // Số lượng sản phẩm
-   table.string('price', 1000).notNullable(); // Giá sản phẩm
-table.string('total_price', 1000).notNullable(); // Tổng giá (quantity * price)
+    table.string('price', 1000).notNullable(); // Giá sản phẩm
+    table.string('total_price', 1000).notNullable(); // Tổng giá (quantity * price)
     table.string('name', 255); // Tên sản phẩm
     table.string('category', 255); // Danh mục sản phẩm
     table.text('image'); // Link ảnh sản phẩm

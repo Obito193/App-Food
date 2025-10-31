@@ -147,7 +147,7 @@ const Cart: React.FC = () => {
 
   const handleCreateOrder = () => {
     if(Array.isArray(cartItems) && cartItems?.length > 0){
-      goToOrder({products: cartItems})
+      goToOrder({products: cartItems, type: 'cart'})
     }
   }
 
@@ -244,7 +244,7 @@ const Cart: React.FC = () => {
 
               )}
             />
-            <View style={{ padding: 10 }}>
+            {/* <View style={{ padding: 10 }}>
               <Text style={{ ...styles_c.font_text_16_600 }}>Gợi ý sản phẩm</Text>
             </View>
             <View style={{ flex: 1, padding: 5, paddingBottom: 30 }}>
@@ -257,7 +257,7 @@ const Cart: React.FC = () => {
                 contentContainerStyle={{ gap: 10 }}
                 renderItem={renderItem}
               />
-            </View>
+            </View> */}
           </Fragment>
         )}
       />

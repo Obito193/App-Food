@@ -19,7 +19,7 @@ const initialState: AuthProps = {
 export const loginAccount = createAsyncThunk(
   'post/loginAccount',
   async (data: LoginSendData) => {
-    const response = await useCallAPI({ method: 'POST', url: `${URL_API}login`, data: data, showToast: true })
+    const response = await useCallAPI({ method: 'POST', url: `${URL_API}login`, data: data, showToast: false })
     return response
   }
 )
@@ -27,7 +27,7 @@ export const loginAccount = createAsyncThunk(
 export const registerAccount = createAsyncThunk(
   'post/registerAccount',
   async (data: RegisterSendData) => {
-    const response = await useCallAPI({ method: 'POST', url: `${URL_API}register`, data: data, showToast: true })
+    const response = await useCallAPI({ method: 'POST', url: `${URL_API}register`, data: data, showToast: false })
     return response
   }
 )

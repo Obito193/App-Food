@@ -17,7 +17,7 @@ const OrderInfo: React.FC = () => {
   const { data } = route.params ?? {}; // mảng sản phẩm
   const { createOrderResponse } = useSelector((state: RootState) => state.order, shallowEqual)
   const {tokenData}= useSelector((state: RootState) => state.auth, shallowEqual)
-  console.log('datassss', data)
+  console.log('datassss', JSON.stringify(data))
 
   const handleSend = () => {
     if(tokenData && data){

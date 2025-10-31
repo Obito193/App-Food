@@ -45,6 +45,8 @@ const ProductDetail: React.FC = () => {
     }
   }
 
+  console.log('product', [product])
+
   return (
     <Container>
       <HeaderCustom
@@ -68,7 +70,7 @@ const ProductDetail: React.FC = () => {
             onPress={onPressAddCart}>
               <Text style={styles.buttonText}>Thêm vào giỏ hàng</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={() => goToOrder({products: [product]})}>
+            <TouchableOpacity style={styles.button} onPress={() => goToOrder({products: [product], type: 'product_detail'})}>
               <Text style={styles.buttonText}>Đặt hàng ngay</Text>
             </TouchableOpacity>
           </View>

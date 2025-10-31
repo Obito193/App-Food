@@ -4,7 +4,7 @@ const client = new Client({
   node: 'https://localhost:9200',
   auth: {
     username: 'elastic',
-    password: 'mật_khẩu_bạn_copy_ở_console'
+    password: 'f*5h-wwwJYXDIzUN7PAd'
   },
   tls: {
     rejectUnauthorized: false

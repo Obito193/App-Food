@@ -15,7 +15,7 @@ interface SearchProps { }
 
 const Search: React.FC<SearchProps> = () => {
   const { goToCart } = useNavigationComponentApp()
-  const [textSearch, setTextSearch] = useState<string>('')
+  const [textSearch, setTextSearch] = useState < string > ('')
 
   const receiveTextSearch = (text: string) => {
     setTextSearch(text)
@@ -51,23 +51,23 @@ const Search: React.FC<SearchProps> = () => {
 
   return (
     <Container style={{ backgroundColor: colors.orange_primary, flex: 1 }}>
-  <HeaderApp title="Tìm kiếm" />
-  
-  <View style={{ flex: 1 }}>
-    {/* Phần trên cố định */}
-    <View>
-       <View style={{ ...styles_c.row_direction_align_center, gap: 8, padding: 10 }}>
-          <View style={{width: '90%'}}>
-            <SearchBar recieveText={receiveTextSearch} />
-          </View>
-          <View style={{width: '10%'}}>
-             <TouchableOpacity onPress={() => goToCart()}>
-            <Feather name='shopping-cart' size={sizes._25sdp} color={colors.white} />
-          </TouchableOpacity>
-          </View>
-        </View>
+      <HeaderApp title="Tìm kiếm" />
 
-      <View style={{ backgroundColor: colors.white, paddingHorizontal: 10, paddingVertical: 5, gap:5 }}>
+      <View style={{ flex: 1 }}>
+        {/* Phần trên cố định */}
+        <View>
+          <View style={{ ...styles_c.row_direction_align_center, gap: 8, padding: 10 }}>
+            <View style={{ width: '90%' }}>
+              <SearchBar recieveText={receiveTextSearch} />
+            </View>
+            <View style={{ width: '10%' }}>
+              <TouchableOpacity onPress={() => goToCart()}>
+                <Feather name='shopping-cart' size={sizes._25sdp} color={colors.white} />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* <View style={{ backgroundColor: colors.white, paddingHorizontal: 10, paddingVertical: 5, gap:5 }}>
         <Text style={{ fontWeight: 'bold', marginBottom: 5 }}>Gợi ý chuyên mục</Text>
         <FlatList
           scrollEnabled={false}
@@ -94,10 +94,10 @@ const Search: React.FC<SearchProps> = () => {
           )}
         />
       </View>
-    </View>
+    </View> */}
 
-    {/* Phần dưới scroll */}
-    <View style={{ flex: 1, backgroundColor: colors.white }}>
+          {/* Phần dưới scroll */}
+          {/* <View style={{ flex: 1, backgroundColor: colors.white }}>
       <View style={{ marginLeft: 10, marginVertical: 10 }}>
         <Text style={{ fontWeight: 'bold', color: colors.black }}>Gợi ý sản phẩm</Text>
       </View>
@@ -109,9 +109,10 @@ const Search: React.FC<SearchProps> = () => {
         contentContainerStyle={{ paddingBottom: 30, paddingHorizontal: 10, gap: 10 }}
         renderItem={renderItem}
       />
-    </View>
-  </View>
-</Container>
+    </View> */}
+        </View>
+      </View>
+    </Container>
 
   )
 }

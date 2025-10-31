@@ -12,16 +12,18 @@ import FastImage from "react-native-fast-image";
 
 const Order: React.FC = () => {
   const route = useRoute<any>();
-  const { products } = route.params ?? { products: [] }; // mảng sản phẩm
+  const { products, type } = route.params ?? { products: [] }; // mảng sản phẩm
   const [address, setAddress] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("COD");
   const [payment_method_data, setPaymentMethodData]= useState( { label: "Thanh toán khi nhận hàng", value: "COD" });
   const { goToOrderInfo } = useNavigationComponentApp();
 
+  console.log('products', products)
+
   // lưu số lượng cho từng sản phẩm
   const [quantities, setQuantities] = useState<{ [key: number]: number }>(
     products?.reduce((acc: any, p: any) => {
-      acc[p.id] = 1;
+      acc[p.id] = p.quantity ?? 1;
       return acc;
     }, {})
   );
@@ -56,7 +58,7 @@ const Order: React.FC = () => {
       ...p,
       quantity: quantities[p.id],
       total_price: formatCurrencyToNumber(p.price) * quantities[p.id],
-      product_id: [p.id]
+      product_id: type == 'cart' ? [p.product_id] : [p.id]
     }));
 
     const data = {

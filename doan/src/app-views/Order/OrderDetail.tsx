@@ -1,6 +1,6 @@
 import HeaderApp from '@app-components/HeaderApp/HeaderApp';
 import HeaderCustom from '@app-components/HeaderCustom/HeaderCustom';
-import { useNavigationComponentApp } from '@app-helper/navigateToScreens';
+import { useNavigationComponentApp, useNavigationServices } from '@app-helper/navigateToScreens';
 import { Container } from '@app-layout/Layout';
 import { useRoute } from '@react-navigation/native';
 import { getOrderItemsData, resetOrderItemsData } from '@redux/features/orderSlice';
@@ -70,7 +70,7 @@ const orderItems = [
 const OrderDetail = () => {
   const route = useRoute<any>();
   const { data } = route.params ?? {};
-
+const {replaceScreen} = useNavigationServices()
   const [order, setOrder] = useState<any>();
   const currentStepIndex = STATUS_STEPS.indexOf(order?.order_status);
   const dispatch = useDispatch<AppDispatch>();
@@ -121,7 +121,7 @@ const OrderDetail = () => {
 
   return (
     <Container>
-      <HeaderCustom title='Chi tiết đơn hàng' />
+      <HeaderCustom title='Chi tiết đơn hàng' onPressLeft={() =>  replaceScreen('BottomContainer')}/>
       <View style={styles.container}>
         {/* Trạng thái đơn hàng */}
         <View style={styles.statusCard}>
