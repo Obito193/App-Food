@@ -72,6 +72,38 @@ const cartSlice = createSlice({
       state.cartError = null
       state.cartLoading = false
     },
+    resetCartDataKeepFetched: (state) => {
+      state.cartData = null
+      // ❌ KHÔNG reset hasFetchedCartData
+      state.cartError = null
+      state.cartLoading = false
+    },
+
+    // ✅ RESET nhưng giữ hasFetchedProductCartListData
+    resetProductCartListDataKeepFetched: (state) => {
+      state.productCartListData = null
+      state.currentPageProductCartListData = 1
+      // ❌ KHÔNG reset hasFetchedProductCartListData
+      state.hasMoreProductCartListData = true
+      state.cartError = null
+      state.cartLoading = false
+    },
+
+    // ✅ RESET tất cả nhưng giữ toàn bộ hasFetched
+    resetAllCartKeepFetched: (state) => {
+      state.cartData = null
+      state.productCartListData = null
+      state.currentPageProductCartListData = 1
+      state.hasMoreProductCartListData = true
+      state.increaseProductQuantityInCartResponse = null
+
+      // ❌ giữ nguyên
+      // state.hasFetchedCartData
+      // state.hasFetchedProductCartListData
+
+      state.cartError = null
+      state.cartLoading = false
+    },
     resetProductCartListData: (state) => {
       state.productCartListData = null,
         state.currentPageProductCartListData = 1,
@@ -206,5 +238,13 @@ const cartSlice = createSlice({
   }
 });
 
-export const { resetAllCart, resetCartData, resetIncreaseProductQuantityInCartResponse, resetProductCartListData, updateQuantityOfProductInCart } = cartSlice.actions;
+export const { resetAllCart,
+  resetCartData,
+  resetCartDataKeepFetched,
+  resetProductCartListData,
+  resetProductCartListDataKeepFetched,
+  resetAllCartKeepFetched,
+  resetIncreaseProductQuantityInCartResponse,
+  updateQuantityOfProductInCart
+  } = cartSlice.actions;
 export default cartSlice.reducer;

@@ -3,28 +3,43 @@ const { DB_HOST, DB_USER, DB_PASSWORD, DB_NAME } = require('../configs/config-en
 
 const pool = mysql.createPool({
   host: `${DB_HOST}`,
-  user: `${DB_USER}`,   
-  password: `${DB_PASSWORD}`, 
-  database:`${DB_NAME}`
+  user: `${DB_USER}`,
+  password: `${DB_PASSWORD}`,
+  database: `${DB_NAME}`
 });
 
-async function paginateWithToken(tableName, page, limit, userId, filterColumn, filterValue) {
+async function paginateWithToken(
+  tableName,
+  page,
+  limit,
+  userId,
+  filterColumn,
+  filterValue,
+  sortOrder = 'DESC', // mặc định DESC, có thể truyền 'ASC'
+  sortColumn = 'id' // mặc định sort theo cột id
+) {
   try {
     if (!userId) throw new Error("userId is required");
 
-    page = (page ?? 0) > 0 ? page : null;  
-    limit = (limit ?? 0) > 0 ? limit : null; 
+    page = (page ?? 0) > 0 ? page : null;
+    limit = (limit ?? 0) > 0 ? limit : null;
     filterColumn = filterColumn ?? '';
-    filterValue = filterValue ?? ''; 
-    
-   let query = `SELECT * FROM \`${tableName}\` WHERE user_id = ?`;
+    filterValue = filterValue ?? '';
+
+    let query = `SELECT * FROM \`${tableName}\` WHERE user_id = ?`;
     let params = [userId];
 
     // Nếu có filterColumn và filterValue thì thêm điều kiện
     if (filterColumn && filterValue) {
-     query += ` AND \`${filterColumn}\` LIKE ?`;
+      query += ` AND \`${filterColumn}\` LIKE ?`;
       filterValue = `%${filterValue}%`;
       params.push(filterValue);
+    }
+
+    // Thêm ORDER BY
+    if (sortColumn) {
+      const order = sortOrder.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+      query += ` ORDER BY \`${sortColumn}\` ${order}`;
     }
 
     let totalItems = 0;
@@ -34,11 +49,11 @@ async function paginateWithToken(tableName, page, limit, userId, filterColumn, f
       const offset = (page - 1) * limit;
 
       // Truy vấn tổng số bản ghi
-      let countQuery = `SELECT COUNT(*) AS totalItems  FROM \`${tableName}\`  WHERE user_id = ?`;
+      let countQuery = `SELECT COUNT(*) AS totalItems FROM \`${tableName}\` WHERE user_id = ?`;
       let countParams = [userId];
 
       if (filterColumn && filterValue) {
-        countQuery += ` AND ${filterColumn} LIKE ?`;
+        countQuery += ` AND \`${filterColumn}\` LIKE ?`;
         countParams.push(filterValue);
       }
 

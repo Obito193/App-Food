@@ -30,24 +30,46 @@ const Home: React.FC<HomeProps> = () => {
   }, [tokenData, hasFetchedCartData])
 
   return (
-    <Container style={{ backgroundColor: colors.orange_primary, flex: 1 }}>
-      <HeaderApp title="Trang chủ" />
-      <View style={{ height: sizes._screen_height }}>
-        <View style={{ ...styles_c.row_direction_align_center, gap: 8, padding: 10 }}>
-          <View style={{width: '90%'}}>
-            <SearchBar recieveText={receiveTextSearch} />
-          </View>
-          <View style={{width: '10%'}}>
-             <TouchableOpacity onPress={() => goToCart()}>
-            <Feather name='shopping-cart' size={sizes._25sdp} color={colors.white} />
-          </TouchableOpacity>
-          </View>
-        </View>
-        <View style={{ backgroundColor: colors?.gray_light }}>
-          <ListProductTabBar />
-        </View>
+  <Container style={{ flex: 1, backgroundColor: colors.gray_light }}>
+    {/* HEADER */}
+    <View
+      style={{
+        backgroundColor: colors.orange_primary,
+        paddingTop: sizes._20sdp,
+        paddingBottom: sizes._15sdp,
+        paddingHorizontal: 16,
+        borderBottomLeftRadius: 20,
+        borderBottomRightRadius: 20,
+      }}
+    >
+      <View style={{ ...styles_c.row_direction_align_center, justifyContent: 'space-between' }}>
+        {/* TITLE */}
+        <HeaderApp title="Trang chủ" />
+
+        {/* CART */}
+        <TouchableOpacity
+          onPress={() => goToCart()}
+          style={{
+            backgroundColor: colors.white,
+            padding: 10,
+            borderRadius: 50,
+            elevation: 4,
+          }}
+        >
+          <Feather
+            name="shopping-cart"
+            size={sizes._22sdp}
+            color={colors.orange_primary}
+          />
+        </TouchableOpacity>
       </View>
-    </Container>
+    </View>
+
+    {/* CONTENT */}
+    <View style={{ flex: 1, marginTop: 10 }}>
+      <ListProductTabBar />
+    </View>
+  </Container>
   )
 }
 export default Home

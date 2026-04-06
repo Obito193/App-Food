@@ -27,7 +27,7 @@ const OrderInfo: React.FC = () => {
 
   useEffect(() => {
      if(createOrderResponse?.success && createOrderResponse?.result){
-         goToOrderDetail({data: {...createOrderResponse?.result, id: createOrderResponse?.result?.order_id}}) 
+         goToOrderDetail({data: {...createOrderResponse?.result, id: createOrderResponse?.result?.order_id, trigger: true}}) 
          dispatch(resetCreateOrderResponse())
      }
   },[createOrderResponse])

@@ -1,30 +1,42 @@
-const client = require("../configs/elastic"); // file kết nối elastic đã tạo ở trên
+const mysql = require('mysql2/promise');
+const { DB_HOST, DB_USER, DB_PASSWORD, DB_NAME } = require('../configs/config-env');
 
-async function searchWithPagination({ index, field, query, page = 1, limit = 10 }) {
+const pool = mysql.createPool({
+  host: DB_HOST,
+  user: DB_USER,
+  password: DB_PASSWORD,
+  database: DB_NAME,
+});
+
+async function searchWithPagination({ table, field, query, page = 1, limit = 10 }) {
+  if (!table) throw new Error("Missing 'table' parameter");
+  if (!field) throw new Error("Missing 'field' parameter");
+
+  const offset = (page - 1) * limit;
+
   try {
-    const from = (page - 1) * limit;
+    // Truy vấn tổng số bản ghi khớp
+    const [totalResult] = await pool.execute(
+      `SELECT COUNT(*) as total FROM \`${table}\` WHERE \`${field}\` LIKE ?`,
+      [`%${query}%`]
+    );
+    const total = totalResult[0].total;
 
-    const result = await client.search({
-      index,
-      body: {
-        from,
-        size: limit,
-        query: {
-          match: {
-            [field]: query, // field động
-          },
-        },
-      },
-    });
+    // Truy vấn dữ liệu với phân trang
+    const [rows] = await pool.execute(
+      // LIMIT và OFFSET trực tiếp trong query, chỉ bind giá trị query
+      `SELECT * FROM \`${table}\` WHERE \`${field}\` LIKE ? LIMIT ${limit} OFFSET ${offset}`,
+      [`%${query}%`]
+    );
 
     return {
-      total: result.hits.total.value,
+      total,
       page,
       limit,
-      data: result.hits.hits.map((hit) => hit._source),
+      data: rows,
     };
   } catch (error) {
-    console.error("Elasticsearch search error:", error);
+    console.error("Database search error:", error);
     throw error;
   }
 }

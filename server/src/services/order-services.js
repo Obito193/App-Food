@@ -87,5 +87,37 @@ class OrderServices {
       );
     });
   }
+  static updateOrderStatus(orderId, status) {
+    return new Promise((resolve, reject) => {
+      const validStatuses = ['pending', 'processing', 'shipped', 'delivered'];
+
+      if (!validStatuses.includes(status)) {
+        return reject(new Error(`Status không hợp lệ. Chọn một trong: ${validStatuses.join(', ')}`));
+      }
+
+      const now = new Date();
+      sql.query(
+        "UPDATE `order` SET `order_status` = ?, `updated_at` = ? WHERE `id` = ?",
+        [status, now, orderId],
+        (err, res) => {
+          if (err) {
+            console.log(err);
+            return reject(err);
+          }
+
+          if (res.affectedRows === 0) {
+            return resolve({ message: "Không tìm thấy đơn hàng để cập nhật" });
+          }
+
+          return resolve({
+            order_id: orderId,
+            order_status: status,
+            updated_at: now,
+            message: "Cập nhật trạng thái đơn hàng thành công"
+          });
+        }
+      );
+    });
+  }
 }
 module.exports = OrderServices

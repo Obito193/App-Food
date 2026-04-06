@@ -7,6 +7,7 @@
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "start": "react-native start",
+    "postinstall": "patch-package",
     "test": "jest"
   },
   "dependencies": {
@@ -25,6 +26,8 @@
     "formik": "^2.4.6",
     "lodash": "^4.17.21",
     "module-resolver": "^1.0.0",
+    "patch-package": "^8.0.1",
+    "postinstall-postinstall": "^2.1.0",
     "react": "19.0.0",
     "react-dom": "^19.1.0",
     "react-native": "0.79.1",

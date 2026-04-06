@@ -8,19 +8,20 @@ import colors from '@assets/colors/global_colors';
 import { useNavigationComponentApp, useNavigationServices } from '@app-helper/navigateToScreens';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@redux/store';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '@redux/store';
 import { resetAllAuth } from '@redux/features/authSlice';
 import FastImage from 'react-native-fast-image';
 import { resetAllCart } from '@redux/features/cartSlice';
 import { resetAllOrderData } from '@redux/features/orderSlice';
 import { resetAllProductListData } from '@redux/features/productListSlice';
-import AppLoading from '@app-components/AppLoading/AppLoading';
 
 interface PersonalProps { }
 
 const Personal: React.FC<PersonalProps> = () => {
   const { replaceScreen } = useNavigationServices();
-  const {goToOrderList, goToCart} = useNavigationComponentApp()
-  const [loading, setLoading] = useState<boolean>(false)
+  const { goToOrderList, goToCart } = useNavigationComponentApp()
+  const { account } = useSelector((state: RootState) => state.auth, shallowEqual)
   const dispatch = useDispatch<AppDispatch>()
   const { account } = useSelector((state: RootState) => state.auth, shallowEqual)
   const onPressData = () => {
@@ -29,19 +30,18 @@ const Personal: React.FC<PersonalProps> = () => {
     dispatch(resetAllCart())
     dispatch(resetAllOrderData())
     dispatch(resetAllProductListData())
-    setLoading(false)
     replaceScreen('Login')
   }
   const menuOptions = [
-    // { id: '1', icon: 'person-circle-outline', title: 'Thông tin tài khoản' },
-    // { id: '2', icon: 'receipt-outline', title: 'Đơn hàng của tôi', press: () => goToOrderList()  },
-    { id: '3', icon: 'cart', title: 'Giỏ hàng của tôi',press: () => goToCart() },
-    // { id: '4', icon: 'location-outline', title: 'Địa chỉ giao hàng' },
-    // { id: '5', icon: 'settings-outline', title: 'Cài đặt' },
+    { id: '1', icon: 'person-circle-outline', title: 'Thông tin tài khoản' },
+    { id: '2', icon: 'receipt-outline', title: 'Đơn hàng của tôi', press: () => goToOrderList({ trigger: true }) },
+    { id: '3', icon: 'cart', title: 'Giỏ hàng của tôi', press: () => goToCart() },
+    { id: '4', icon: 'location-outline', title: 'Địa chỉ giao hàng' },
+    { id: '5', icon: 'settings-outline', title: 'Cài đặt' },
     { id: '6', icon: 'log-out-outline', title: 'Đăng xuất', press: () => onPressData() },
   ];
-  
-  
+
+
   const handleOptionPress = (title: string) => {
     console.log('Bạn chọn:', title);
     // Thêm điều hướng tại đây nếu cần
@@ -50,12 +50,13 @@ const Personal: React.FC<PersonalProps> = () => {
   return (
     <Container style={{ backgroundColor: colors.orange_primary }}>
       {/* <HeaderApp title="Cá nhân" /> */}
-      <Content style={{backgroundColor: colors.white }}>
+      <Content style={{ backgroundColor: colors.white }}>
         <View style={styles.profileContainer}>
           <FastImage
             source={LOGOAPP}
             style={styles.avatar}
           />
+          <Text style={styles.username}>{account?.user_name}</Text>
           <Text style={styles.username}>{account?.user_name}</Text>
         </View>
         <View>
@@ -86,11 +87,11 @@ const styles = StyleSheet.create({
   profileContainer: {
     alignItems: 'center',
     paddingVertical: 20,
-    marginTop:2,
+    marginTop: 2,
     borderBottomWidth: 2,
-    borderTopWidth :2,
+    borderTopWidth: 2,
     borderColor: colors.gray_medium,
-     backgroundColor: colors.orange_primary
+    backgroundColor: colors.orange_primary
   },
   avatar: {
     width: 80,

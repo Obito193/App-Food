@@ -47,3 +47,32 @@ exports.getOrderData = async (req, res, next) => {
   }
 };
 
+exports.updateOrderStatus = async (req, res, next) => {
+  const { order_id, status } = req.body ?? {};
+
+  try {
+    if (!order_id || !status) {
+      return res.status(400).json({
+        success: false,
+        message: "Thiếu order_id hoặc status",
+      });
+    }
+
+    const result = await OrderServices.updateOrderStatus(order_id, status);
+
+    if (result) {
+      return res.status(200).json({
+        success: true,
+        message: "Cập nhật trạng thái đơn hàng thành công",
+        result,
+      });
+    }
+  } catch (err) {
+    const statusCode = err?.status || err?.statusCode || 500;
+    return res.status(statusCode).json({
+      success: false,
+      error: err.message || String(err),
+    });
+  }
+};
+
